@@ -7,6 +7,7 @@ import com.miao.base.model.PageParams;
 import com.miao.base.model.PageResult;
 import com.miao.content.dto.AddCourseDto;
 import com.miao.content.dto.CourseBaseInfoDto;
+import com.miao.content.dto.EditCourseDto;
 import com.miao.content.dto.QueryCourseParamsDto;
 import com.miao.content.mapper.CourseBaseMapper;
 import com.miao.content.mapper.CourseCategoryMapper;
@@ -119,10 +120,69 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //保存营销信息
         saveCourseMarket(courseMarketNew);
         //从数据库查询课程的详细信息，包括两部分
-        CourseBaseInfoDto courseBaseInfo = getCourseBaseInfo(courseId,dto.getSt());
+        CourseBaseInfoDto courseBaseInfo = getCourseBaseInfo(courseId, dto.getSt());
 
         return courseBaseInfo;
 
+    }
+
+    @Override
+    public CourseBaseInfoDto selectCourseBaseInfoById(Long courseId) {
+        CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
+        if (courseBase == null) {
+            XueChengPlusException.cast("该课程不存在");
+            return null;
+        }
+        BeanUtils.copyProperties(courseBase, courseBaseInfoDto);
+
+        if (courseMarket != null) {
+            BeanUtils.copyProperties(courseMarket, courseBaseInfoDto);
+        }
+
+
+        //通过courseCategoryMapper查询分类信息，将分类名称放在courseBaseInfoDto对象
+        //todo：课程分类的名称设置到courseBaseInfoDto
+        CourseCategory mtCategory = courseCategoryMapper.selectById(courseBase.getMt());
+        CourseCategory stCategory = courseCategoryMapper.selectById(courseBase.getSt());
+        courseBaseInfoDto.setMtName(mtCategory.getName());
+        courseBaseInfoDto.setStName(stCategory.getName());
+
+        return courseBaseInfoDto;
+    }
+
+    @Override
+    public CourseBaseInfoDto updateCourseBase(Long companyId, EditCourseDto editCourseDto) {
+
+        Long courseId = editCourseDto.getId();
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        if (courseBase == null) {
+            XueChengPlusException.cast("课程不存在");
+        }
+
+        //校验本机构只能修改本机构的课程
+        if (!courseBase.getCompanyId().equals(companyId)) {
+            XueChengPlusException.cast("本机构只能修改本机构的课程");
+        }
+        //封装基本信息的数据
+        BeanUtils.copyProperties(editCourseDto, courseBase);
+        courseBase.setChangeDate(LocalDateTime.now());
+
+        //更新课程基本信息
+        int i = courseBaseMapper.updateById(courseBase);
+        if (i <= 0) {
+            XueChengPlusException.cast("修改课程失败");
+        }
+
+        //封装营销信息的数据
+        CourseMarket courseMarket = new CourseMarket();
+        BeanUtils.copyProperties(editCourseDto, courseMarket);
+        saveCourseMarket(courseMarket);
+
+        //查询课程信息
+        CourseBaseInfoDto courseBaseInfo = selectCourseBaseInfoById(courseId);
+        return courseBaseInfo;
     }
 
     //查询课程信息

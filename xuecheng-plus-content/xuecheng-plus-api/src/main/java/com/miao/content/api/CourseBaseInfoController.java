@@ -1,18 +1,19 @@
 package com.miao.content.api;
 
+import com.miao.base.exception.ValidationGroups;
 import com.miao.base.model.PageParams;
 import com.miao.base.model.PageResult;
 import com.miao.content.dto.AddCourseDto;
 import com.miao.content.dto.CourseBaseInfoDto;
+import com.miao.content.dto.EditCourseDto;
 import com.miao.content.dto.QueryCourseParamsDto;
 import com.miao.content.model.po.CourseBase;
 import com.miao.content.service.CourseBaseInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -36,11 +37,26 @@ public class CourseBaseInfoController {
 
     @ApiOperation("新增课程")
     @PostMapping("/course")
-    public CourseBaseInfoDto createCourseBase(@RequestBody AddCourseDto addCourseDto){
+    public CourseBaseInfoDto createCourseBase(@RequestBody AddCourseDto addCourseDto) {
         //获取到用户所属机构的id
         Long companyId = 1232141425L;
 //        int i = 1/0;
         CourseBaseInfoDto courseBase = courseBaseInfoService.createCourseBase(companyId, addCourseDto);
         return courseBase;
+    }
+
+    @ApiOperation("根据课程id查询课程基础信息")
+    @GetMapping("/course/{courseId}")
+    public CourseBaseInfoDto getCourseBaseById(@PathVariable("courseId") Long courseId) {
+
+        return courseBaseInfoService.selectCourseBaseInfoById(courseId);
+    }
+
+
+    @PutMapping("/course")
+    @ApiOperation("修改课程")
+    public CourseBaseInfoDto updateCourseBase(@RequestBody @Validated(ValidationGroups.Update.class) EditCourseDto editCourseDto) {
+        Long companyId = 1232141425L;
+        return courseBaseInfoService.updateCourseBase(companyId, editCourseDto);
     }
 }
