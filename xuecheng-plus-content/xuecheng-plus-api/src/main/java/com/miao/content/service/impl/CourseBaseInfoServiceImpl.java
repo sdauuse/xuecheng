@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
@@ -60,6 +61,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     }
 
     @Override
+    @Transactional
     public CourseBaseInfoDto createCourseBase(Long companyId, AddCourseDto dto) {
         //参数的合法性校验
         if (StringUtils.isBlank(dto.getName())) {
