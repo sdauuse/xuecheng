@@ -97,4 +97,21 @@
 
     </select>
 
+
+    <!--<select id="selectListOrderByDesc" parameterType="long" resultType="com.miao.content.model.po.Teachplan">
+        SELECT *
+        FROM teachplan
+        WHERE parentid = #{parentId}
+        and course_id = #{courseId}
+        ORDER BY orderby DESC
+    </select>-->
+
+   <!-- <select id="selectListOrderByAsc" parameterType="long" resultType="com.miao.content.model.po.Teachplan">
+        SELECT *
+        FROM teachplan
+        WHERE parentid = #{parentId}
+        and course_id = #{courseId}
+        ORDER BY orderby ASC
+    </select>-->
+
 </mapper>

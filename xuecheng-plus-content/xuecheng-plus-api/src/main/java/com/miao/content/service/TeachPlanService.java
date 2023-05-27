@@ -2,6 +2,7 @@ package com.miao.content.service;
 
 import com.miao.content.dto.SaveTeachplanDto;
 import com.miao.content.dto.TeachplanDto;
+import com.miao.content.model.po.CourseTeacher;
 
 import java.util.List;
 
@@ -21,4 +22,14 @@ public interface TeachPlanService {
     public List<TeachplanDto> findTeachPlanTree(Long courseId);
 
     void saveAndUpdateTeachPlan(SaveTeachplanDto teachplan);
+
+    void deleteTeachplan(Long courseId);
+
+    void moveUp(Long courseId);
+
+    void moveDown(Long courseId);
+
+    List<CourseTeacher> selectTeachersByCourseId(Long courseId);
+
+    void deleteWithCourseId(Long courseId);
 }

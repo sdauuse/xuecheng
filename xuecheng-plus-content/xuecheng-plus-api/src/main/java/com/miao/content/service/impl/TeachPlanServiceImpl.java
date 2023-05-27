@@ -1,9 +1,15 @@
 package com.miao.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.miao.base.exception.XueChengPlusException;
 import com.miao.content.dto.SaveTeachplanDto;
 import com.miao.content.dto.TeachplanDto;
+import com.miao.content.mapper.CourseBaseMapper;
+import com.miao.content.mapper.CourseMarketMapper;
+import com.miao.content.mapper.CourseTeacherMapper;
 import com.miao.content.mapper.TeachPlanMapper;
+import com.miao.content.model.po.CourseBase;
+import com.miao.content.model.po.CourseTeacher;
 import com.miao.content.model.po.Teachplan;
 import com.miao.content.service.TeachPlanService;
 import io.swagger.models.auth.In;
@@ -17,10 +23,21 @@ import java.util.List;
 
 @Service
 @Slf4j
+@SuppressWarnings("all")
 public class TeachPlanServiceImpl implements TeachPlanService {
 
     @Autowired
     private TeachPlanMapper teachplanMapper;
+
+    @Autowired
+    private CourseTeacherMapper courseTeacherMapper;
+
+    @Autowired
+    private CourseBaseMapper courseBaseMapper;
+
+    @Autowired
+    private CourseMarketMapper courseMarketMapper;
+
 
     @Override
     public List<TeachplanDto> findTeachPlanTree(Long courseId) {
@@ -62,5 +79,101 @@ public class TeachPlanServiceImpl implements TeachPlanService {
             BeanUtils.copyProperties(teachplanDto, teachplan);
             teachplanMapper.updateById(teachplan);
         }
+    }
+
+    @Transactional()
+    @Override
+    public void deleteTeachplan(Long courseId) {
+        Teachplan teachplan = teachplanMapper.selectById(courseId);
+        if (teachplan.getGrade() == 2) {
+            //二级标题可以删除
+            teachplanMapper.deleteById(courseId);
+        } else {
+            //一级标题要检查是否有子标题
+            LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Teachplan::getParentid, courseId);
+            Integer n = teachplanMapper.selectCount(queryWrapper);
+            if (n == 0) {
+                teachplanMapper.deleteById(courseId);
+            } else {
+                XueChengPlusException.cast("课程计划信息还有子级信息，无法操作");
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void moveUp(Long courseId) {
+
+        Teachplan teachplan = teachplanMapper.selectById(courseId);
+
+        List<Teachplan> teachplans = teachplanMapper.selectListOrderByDesc(teachplan.getParentid(), teachplan.getCourseId());
+        boolean flag = false;
+        for (Teachplan t : teachplans) {
+            if (t.getOrderby() < teachplan.getOrderby()) {
+                int temp = teachplan.getOrderby();
+                teachplan.setOrderby(t.getOrderby());
+                t.setOrderby(temp);
+                teachplanMapper.updateById(t);
+                teachplanMapper.updateById(teachplan);
+                flag = true;
+                return;
+            }
+        }
+
+        if (!flag) {
+            XueChengPlusException.cast("上移失败");
+        }
+
+    }
+
+    @Transactional
+    @Override
+    public void moveDown(Long courseId) {
+        Teachplan teachplan = teachplanMapper.selectById(courseId);
+
+        List<Teachplan> teachplans = teachplanMapper.selectListOrderByAsc(teachplan.getParentid(), teachplan.getCourseId());
+        boolean flag = false;
+        for (Teachplan t : teachplans) {
+            if (t.getOrderby() > teachplan.getOrderby()) {
+                int temp = teachplan.getOrderby();
+                teachplan.setOrderby(t.getOrderby());
+                t.setOrderby(temp);
+                teachplanMapper.updateById(t);
+                teachplanMapper.updateById(teachplan);
+                flag = true;
+                return;
+            }
+        }
+
+        if (!flag) {
+            XueChengPlusException.cast("下移失败");
+        }
+    }
+
+    @Override
+    public List<CourseTeacher> selectTeachersByCourseId(Long courseId) {
+
+        LambdaQueryWrapper<CourseTeacher> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CourseTeacher::getCourseId, courseId);
+        List<CourseTeacher> courseTeacher = courseTeacherMapper.selectList(queryWrapper);
+
+        return courseTeacher;
+    }
+
+
+    @Transactional
+    @Override
+    public void deleteWithCourseId(Long courseId) {
+        LambdaQueryWrapper<CourseTeacher> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CourseTeacher::getCourseId, courseId);
+
+        LambdaQueryWrapper<Teachplan> teachplanQueryWrapper = new LambdaQueryWrapper<>();
+        teachplanQueryWrapper.eq(Teachplan::getCourseId, courseId);
+
+        courseBaseMapper.deleteById(courseId);
+        courseTeacherMapper.delete(queryWrapper);
+        teachplanMapper.delete(teachplanQueryWrapper);
+        courseMarketMapper.deleteById(courseId);
     }
 }

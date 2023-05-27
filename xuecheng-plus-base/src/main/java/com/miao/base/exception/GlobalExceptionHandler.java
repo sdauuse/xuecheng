@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
 
         //记录异常
         log.error("系统异常{}", e.getErrMessage(), e);
+        log.error("errrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr========================");
         //..
 
         //解析出异常信息
