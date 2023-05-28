@@ -1,0 +1,30 @@
+server:
+  servlet:
+    context-path: /system
+  port: 63110
+#微服务配置
+spring:
+  application:
+    name: system-api
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://42.194.194.60:3306/xuecheng_system?serverTimezone=UTC&useUnicode=true&useSSL=false&characterEncoding=utf8&
+    username: root
+    password: 313725190
+
+# 日志文件配置路径
+logging:
+  config: classpath:log4j2-dev.xml
+hikari:
+  minimum-idle: 3  # 最小空闲连接数量
+  maximum-pool-size: 5  # 连接池最大连接数，默认是10
+  max-lifetime: 1800000  # 此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+  connection-test-query: SELECT 1
+
+# swagger 文档配置
+swagger:
+  title: "学成在线系统管理"
+  description: "系统管理接口"
+  base-package: com.xuecheng.system
+  enabled: true
+  version: 1.0.0
