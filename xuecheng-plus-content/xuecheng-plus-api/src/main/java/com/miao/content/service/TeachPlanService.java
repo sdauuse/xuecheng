@@ -1,5 +1,6 @@
 package com.miao.content.service;
 
+import com.miao.content.dto.BindTeachplanMediaDto;
 import com.miao.content.dto.SaveTeachplanDto;
 import com.miao.content.dto.TeachplanDto;
 import com.miao.content.model.po.CourseTeacher;
@@ -32,4 +33,8 @@ public interface TeachPlanService {
     List<CourseTeacher> selectTeachersByCourseId(Long courseId);
 
     void deleteWithCourseId(Long courseId);
+
+    void associationMedia(BindTeachplanMediaDto bindTeachplanMediaDto);
+
+    void deleteAssociationMedia(Long teachPlanId, Long mediaId);
 }

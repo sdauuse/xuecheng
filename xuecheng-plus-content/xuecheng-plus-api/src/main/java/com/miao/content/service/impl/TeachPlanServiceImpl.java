@@ -2,18 +2,18 @@ package com.miao.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.miao.base.exception.XueChengPlusException;
+import com.miao.content.dto.BindTeachplanMediaDto;
 import com.miao.content.dto.SaveTeachplanDto;
 import com.miao.content.dto.TeachplanDto;
-import com.miao.content.mapper.CourseBaseMapper;
-import com.miao.content.mapper.CourseMarketMapper;
-import com.miao.content.mapper.CourseTeacherMapper;
-import com.miao.content.mapper.TeachPlanMapper;
+import com.miao.content.mapper.*;
 import com.miao.content.model.po.CourseBase;
 import com.miao.content.model.po.CourseTeacher;
 import com.miao.content.model.po.Teachplan;
+import com.miao.content.model.po.TeachplanMedia;
 import com.miao.content.service.TeachPlanService;
 import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +37,9 @@ public class TeachPlanServiceImpl implements TeachPlanService {
 
     @Autowired
     private CourseMarketMapper courseMarketMapper;
+
+    @Autowired
+    private TeachplanMediaMapper teachplanMediaMapper;
 
 
     @Override
@@ -175,5 +178,38 @@ public class TeachPlanServiceImpl implements TeachPlanService {
         courseTeacherMapper.delete(queryWrapper);
         teachplanMapper.delete(teachplanQueryWrapper);
         courseMarketMapper.deleteById(courseId);
+    }
+
+    @Override
+    public void associationMedia(BindTeachplanMediaDto bindTeachplanMediaDto) {
+        //课程计划id
+        Long teachplanId = bindTeachplanMediaDto.getTeachplanId();
+        Teachplan teachplan = teachplanMapper.selectById(teachplanId);
+        if (teachplan == null) {
+            XueChengPlusException.cast("课程计划不存在");
+        }
+
+        //先删除原有记录,根据课程计划id删除它所绑定的媒资
+        int delete = teachplanMediaMapper.delete(new LambdaQueryWrapper<TeachplanMedia>().eq(TeachplanMedia::getTeachplanId, bindTeachplanMediaDto.getTeachplanId()));
+
+        //再添加新记录
+        TeachplanMedia teachplanMedia = new TeachplanMedia();
+        BeanUtils.copyProperties(bindTeachplanMediaDto, teachplanMedia);
+        teachplanMedia.setCourseId(teachplan.getCourseId());
+        teachplanMedia.setMediaFilename(bindTeachplanMediaDto.getFileName());
+        teachplanMediaMapper.insert(teachplanMedia);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAssociationMedia(Long teachPlanId, Long mediaId) {
+        LambdaQueryWrapper<TeachplanMedia> queryWrapper = new LambdaQueryWrapper();
+
+        if (teachPlanId != null && mediaId != null) {
+            queryWrapper.eq(TeachplanMedia::getTeachplanId, teachPlanId).eq(TeachplanMedia::getMediaId, mediaId);
+        } else {
+            log.debug("teachPlanId不能为空或者mediaId不能为空,teachPlanId={},mediaId={}", teachPlanId, mediaId);
+            XueChengPlusException.cast("teachPlanId不能为空或者mediaId不能为空");
+        }
     }
 }

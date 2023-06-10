@@ -1,5 +1,6 @@
 package com.miao.content.api;
 
+import com.miao.content.dto.BindTeachplanMediaDto;
 import com.miao.content.dto.SaveTeachplanDto;
 import com.miao.content.dto.TeachplanDto;
 import com.miao.content.model.po.CourseTeacher;
@@ -66,9 +67,21 @@ public class TeachPlanController {
 
     @ApiOperation("按照课程号删除课程")
     @DeleteMapping("/course/{courseId}")
-    public void deleteByCourseId(@PathVariable("courseId")Long courseId) {
+    public void deleteByCourseId(@PathVariable("courseId") Long courseId) {
 
         teachPlanService.deleteWithCourseId(courseId);
     }
 
+
+    @ApiOperation(value = "课程计划和媒资信息绑定")
+    @PostMapping("/teachplan/association/media")
+    public void associationMedia(@RequestBody BindTeachplanMediaDto bindTeachplanMediaDto) {
+        teachPlanService.associationMedia(bindTeachplanMediaDto);
+    }
+
+    @ApiOperation(value = "绑定视频删除")
+    @DeleteMapping("/teachplan/association/media/{teachPlanId}/{mediaId}")
+    public void deleteAssociationMedia(@PathVariable("teachPlanId") Long teachPlanId, @PathVariable("mediaId") Long mediaId) {
+        teachPlanService.deleteAssociationMedia(teachPlanId, mediaId);
+    }
 }
