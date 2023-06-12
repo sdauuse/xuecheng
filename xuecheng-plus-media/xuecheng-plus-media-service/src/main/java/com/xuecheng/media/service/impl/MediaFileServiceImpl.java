@@ -67,6 +67,13 @@ public class MediaFileServiceImpl implements MediaFileService {
     @Autowired
     MediaProcessMapper mediaProcessMapper;
 
+
+    @Override
+    public MediaFiles getFileById(String mediaId) {
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(mediaId);
+        return mediaFiles;
+    }
+
     @Override
     public PageResult<MediaFiles> queryMediaFiels(Long companyId, PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto) {
 
