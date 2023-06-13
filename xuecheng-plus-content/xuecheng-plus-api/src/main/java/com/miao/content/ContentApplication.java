@@ -10,7 +10,8 @@ import org.springframework.context.annotation.ComponentScan;
 //@SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
 @SpringBootApplication
 @EnableSwagger2Doc
-//@MapperScan(basePackages = {"com.xuecheng.content"})
+@ComponentScan(basePackages = {"com.miao.content","com.xuecheng.messagesdk"})//扫描 @Service、@Controller 注解
+@MapperScan(basePackages = {"com.miao.content"})
 public class ContentApplication {
 
     public static void main(String[] args) {

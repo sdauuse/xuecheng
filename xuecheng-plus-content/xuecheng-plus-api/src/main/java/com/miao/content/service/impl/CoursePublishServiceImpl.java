@@ -1,6 +1,7 @@
 package com.miao.content.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.miao.base.exception.CommonError;
 import com.miao.base.exception.XueChengPlusException;
 import com.miao.content.dto.CourseBaseInfoDto;
 import com.miao.content.dto.CoursePreviewDto;
@@ -11,10 +12,13 @@ import com.miao.content.mapper.CoursePublishMapper;
 import com.miao.content.mapper.CoursePublishPreMapper;
 import com.miao.content.model.po.CourseBase;
 import com.miao.content.model.po.CourseMarket;
+import com.miao.content.model.po.CoursePublish;
 import com.miao.content.model.po.CoursePublishPre;
 import com.miao.content.service.CourseBaseInfoService;
 import com.miao.content.service.CoursePublishService;
 import com.miao.content.service.TeachPlanService;
+import com.xuecheng.messagesdk.model.po.MqMessage;
+import com.xuecheng.messagesdk.service.MqMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -22,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -49,9 +54,12 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
     @Autowired
     CoursePublishPreMapper coursePublishPreMapper;
+
     @Autowired
     CoursePublishMapper coursePublishMapper;
 
+    @Resource
+    MqMessageService mqMessageService;
 
     @Override
     public CoursePreviewDto getCoursePreviewInfo(Long courseId) {
@@ -134,8 +142,51 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         courseBaseMapper.updateById(courseBase);
     }
 
+    @Transactional
     @Override
     public void publish(Long companyId, Long courseId) {
+        //查询预发布表
+        CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
+        if (coursePublishPre == null) {
+            XueChengPlusException.cast("课程没有审核记录，无法发布");
+        }
+
+        //状态
+        String status = coursePublishPre.getStatus();
+        //课程如果没有审核通过不允许发布
+        if (!status.equals("202004")) {
+            XueChengPlusException.cast("课程没有审核通过不允许发布");
+        }
+
+        CoursePublish coursePublish = new CoursePublish();
+        BeanUtils.copyProperties(coursePublishPre, coursePublish);
+
+        //先查询课程发布，如果有则更新，没有再添加
+        CoursePublish coursePublishObj = coursePublishMapper.selectById(courseId);
+        if (coursePublishObj == null) {
+            coursePublishMapper.insert(coursePublish);
+        } else {
+            coursePublishMapper.updateById(coursePublish);
+        }
+
+        //向消息表写入数据
+        //mqMessageService.addMessage("course_publish",String.valueOf(courseId),null,null);
+        saveCoursePublishMessage(courseId);
+
+        //将预发布表数据删除
+        coursePublishPreMapper.deleteById(courseId);
+    }
+
+    /**
+     * @description 保存消息表记录
+     * @param courseId  课程id
+     * @return void
+     */
+    private void saveCoursePublishMessage(Long courseId) {
+        MqMessage mqMessage = mqMessageService.addMessage("course_publish", String.valueOf(courseId), null, null);
+        if (mqMessage == null) {
+            XueChengPlusException.cast(CommonError.UNKOWN_ERROR);
+        }
 
     }
 
