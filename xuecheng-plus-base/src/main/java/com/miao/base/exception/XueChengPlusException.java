@@ -1,5 +1,6 @@
 package com.miao.base.exception;
 
+
 /**
  * @author Mr.M
  * @version 1.0
@@ -16,6 +17,7 @@ public class XueChengPlusException extends RuntimeException {
     public XueChengPlusException(String message) {
         super(message);
         this.errMessage = message;
+
     }
 
     public String getErrMessage() {
@@ -26,11 +28,10 @@ public class XueChengPlusException extends RuntimeException {
         this.errMessage = errMessage;
     }
 
-    public static void cast(String message) {
+    public static void cast(String message){
         throw new XueChengPlusException(message);
     }
-
-    public static void cast(CommonError error) {
+    public static void cast(CommonError error){
         throw new XueChengPlusException(error.getErrMessage());
     }
 

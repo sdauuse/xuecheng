@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @EnableSwagger2Doc
 @ComponentScan(basePackages = {"com.miao.content","com.xuecheng.messagesdk"})//扫描 @Service、@Controller 注解
-@MapperScan(basePackages = {"com.miao.content"})
+@MapperScan(basePackages = {"com.miao.content.mapper"})
 public class ContentApplication {
 
     public static void main(String[] args) {
