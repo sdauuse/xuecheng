@@ -5,12 +5,14 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
 //@SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
 @SpringBootApplication
 @EnableSwagger2Doc
 @ComponentScan(basePackages = {"com.miao.content","com.xuecheng.messagesdk"})//扫描 @Service、@Controller 注解
+@EnableFeignClients(basePackages={"com.miao.content.feignclient"})
 @MapperScan(basePackages = {"com.miao.content.mapper"})
 public class ContentApplication {
 

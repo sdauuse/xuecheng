@@ -149,38 +149,37 @@ public class MediaFileServiceImpl implements MediaFileService {
     }
 
     @Override
-    public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto, String localFilePath) {
+    public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto, String localFilePath,String objectName) {
 
         //文件名
         String filename = uploadFileParamsDto.getFilename();
-        //扩展名
+        //先得到扩展名
         String extension = filename.substring(filename.lastIndexOf("."));
 
-        //mimeType
+        //得到mimeType
         String mimeType = getMimeType(extension);
 
         //子目录
         String defaultFolderPath = getDefaultFolderPath();
-
-        //文件的md5值，检查文件的完整性
         //文件的md5值
         String fileMd5 = getFileMd5(new File(localFilePath));
-        String objectName = defaultFolderPath + fileMd5 + extension;
-
-        //将文件上传到minio
+        if(StringUtils.isEmpty(objectName)){
+            //使用默认年月日去存储
+            objectName = defaultFolderPath+fileMd5+extension;
+        }
+        //上传文件到minio
         boolean result = addMediaFilesToMinIO(localFilePath, mimeType, bucket_mediafiles, objectName);
-        if (!result) {
+        if(!result){
             XueChengPlusException.cast("上传文件失败");
         }
-
-        //将文件信息保存到mysql中
+        //入库文件信息
         MediaFiles mediaFiles = currentProxy.addMediaFilesToDb(companyId, fileMd5, uploadFileParamsDto, bucket_mediafiles, objectName);
-        if (mediaFiles == null) {
-            XueChengPlusException.cast("文件上传数据库，保存信息失败");
+        if(mediaFiles==null){
+            XueChengPlusException.cast("文件上传后保存信息失败");
         }
-
+        //准备返回的对象
         UploadFileResultDto uploadFileResultDto = new UploadFileResultDto();
-        BeanUtils.copyProperties(mediaFiles, uploadFileResultDto);
+        BeanUtils.copyProperties(mediaFiles,uploadFileResultDto);
 
         return uploadFileResultDto;
     }

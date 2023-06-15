@@ -2,6 +2,8 @@ package com.miao.content.service;
 
 import com.miao.content.dto.CoursePreviewDto;
 
+import java.io.File;
+
 /**
  * @author Mr.M
  * @version 1.0
@@ -38,4 +40,8 @@ public interface CoursePublishService {
   * @date 2022/9/20 16:23
   */
  public void publish(Long companyId,Long courseId);
+
+ File generateCourseHtml(Long courseId);
+
+ void uploadCourseHtml(Long courseId, File file);
 }

@@ -1,12 +1,20 @@
 package com.miao.content.service.jobhandler;
 
+import com.miao.base.exception.XueChengPlusException;
+import com.miao.content.mapper.CoursePublishMapper;
+import com.miao.content.model.po.CoursePublish;
+import com.miao.content.service.CoursePublishService;
 import com.xuecheng.messagesdk.model.po.MqMessage;
 import com.xuecheng.messagesdk.service.MessageProcessAbstract;
 import com.xuecheng.messagesdk.service.MqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
 
 /**
  * @author Mr.M
@@ -18,6 +26,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class CoursePublishTask extends MessageProcessAbstract {
 
+    @Autowired
+    CoursePublishService coursePublishService;
+
+
+    @Autowired
+    CoursePublishMapper coursePublishMapper;
     //任务调度入口
     @XxlJob("CoursePublishJobHandler")
     public void coursePublishJobHandler() throws Exception {
@@ -59,12 +73,18 @@ public class CoursePublishTask extends MessageProcessAbstract {
         //查询数据库取出该阶段执行状态
         int stageOne = mqMessageService.getStageOne(taskId);
         if(stageOne>0){
-           log.debug("课程静态化任务完成，无需处理...");
-           return ;
+            log.debug("课程静态化任务完成，无需处理...");
+            return ;
         }
 
-        //开始进行课程静态化
-        //int i=1/0;//制造一个异常表示任务执行中有问题
+
+        //开始进行课程静态化 生成html页面
+        File file = coursePublishService.generateCourseHtml(courseId);
+        if(file == null){
+            XueChengPlusException.cast("生成的静态页面为空");
+        }
+        // 将html上传到minio
+        coursePublishService.uploadCourseHtml(courseId,file);
 
         //..任务处理完成写任务状态为完成
         mqMessageService.completedStageOne(taskId);
@@ -75,7 +95,7 @@ public class CoursePublishTask extends MessageProcessAbstract {
     //保存课程索引信息 第二个阶段任务
     private void saveCourseIndex(MqMessage mqMessage,long courseId){
         //任务id
-        Long taskId = mqMessage.getId();
+       /* Long taskId = mqMessage.getId();
         MqMessageService mqMessageService = this.getMqMessageService();
         //取出第二个阶段状态
         int stageTwo = mqMessageService.getStageTwo(taskId);
@@ -85,10 +105,20 @@ public class CoursePublishTask extends MessageProcessAbstract {
             log.debug("课程索引信息已写入，无需执行...");
             return;
         }
-        //查询课程信息，调用搜索服务添加索引 ...
+        //查询课程信息，调用搜索服务添加索引接口
+        //从课程发布表查询课程信息
+        CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+
+        CourseIndex courseIndex = new CourseIndex();
+        BeanUtils.copyProperties(coursePublish,courseIndex);
+        //远程调用
+        Boolean add = searchServiceClient.add(courseIndex);
+        if(!add){
+            XueChengPlusException.cast("远程调用搜索服务添加课程索引失败");
+        }*/
 
         //完成本阶段的任务
-        mqMessageService.completedStageTwo(taskId);
+        //mqMessageService.completedStageTwo(taskId);
 
 
     }
