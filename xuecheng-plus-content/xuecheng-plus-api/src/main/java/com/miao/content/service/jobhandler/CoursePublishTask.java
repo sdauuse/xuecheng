@@ -1,6 +1,8 @@
 package com.miao.content.service.jobhandler;
 
 import com.miao.base.exception.XueChengPlusException;
+import com.miao.content.feignclient.CourseIndex;
+import com.miao.content.feignclient.SearchServiceClient;
 import com.miao.content.mapper.CoursePublishMapper;
 import com.miao.content.model.po.CoursePublish;
 import com.miao.content.service.CoursePublishService;
@@ -29,9 +31,12 @@ public class CoursePublishTask extends MessageProcessAbstract {
     @Autowired
     CoursePublishService coursePublishService;
 
+    @Autowired
+    SearchServiceClient searchServiceClient;
 
     @Autowired
     CoursePublishMapper coursePublishMapper;
+
     //任务调度入口
     @XxlJob("CoursePublishJobHandler")
     public void coursePublishJobHandler() throws Exception {
@@ -94,8 +99,8 @@ public class CoursePublishTask extends MessageProcessAbstract {
 
     //保存课程索引信息 第二个阶段任务
     private void saveCourseIndex(MqMessage mqMessage,long courseId){
-        //任务id
-       /* Long taskId = mqMessage.getId();
+       /* //任务id
+        Long taskId = mqMessage.getId();
         MqMessageService mqMessageService = this.getMqMessageService();
         //取出第二个阶段状态
         int stageTwo = mqMessageService.getStageTwo(taskId);
@@ -115,10 +120,10 @@ public class CoursePublishTask extends MessageProcessAbstract {
         Boolean add = searchServiceClient.add(courseIndex);
         if(!add){
             XueChengPlusException.cast("远程调用搜索服务添加课程索引失败");
-        }*/
+        }
 
         //完成本阶段的任务
-        //mqMessageService.completedStageTwo(taskId);
+        mqMessageService.completedStageTwo(taskId);*/
 
 
     }
