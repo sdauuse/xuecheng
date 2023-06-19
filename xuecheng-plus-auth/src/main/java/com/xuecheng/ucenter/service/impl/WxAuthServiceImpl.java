@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -41,9 +42,9 @@ public class WxAuthServiceImpl implements AuthService, WxAuthService {
     @Autowired
     WxAuthServiceImpl currentPorxy;
 
+
     @Autowired
     RestTemplate restTemplate;
-
 
     @Value("${weixin.appid}")
     String appid;
