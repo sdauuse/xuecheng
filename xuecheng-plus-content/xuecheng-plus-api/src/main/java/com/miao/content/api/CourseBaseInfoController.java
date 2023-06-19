@@ -9,9 +9,11 @@ import com.miao.content.dto.EditCourseDto;
 import com.miao.content.dto.QueryCourseParamsDto;
 import com.miao.content.model.po.CourseBase;
 import com.miao.content.service.CourseBaseInfoService;
+import com.miao.content.util.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +50,11 @@ public class CourseBaseInfoController {
     @ApiOperation("根据课程id查询课程基础信息")
     @GetMapping("/course/{courseId}")
     public CourseBaseInfoDto getCourseBaseById(@PathVariable("courseId") Long courseId) {
-
+        //获取当前用户的身份
+        //Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //System.out.println(principal);
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+        System.out.println(user.getUsername());
         return courseBaseInfoService.selectCourseBaseInfoById(courseId);
     }
 
