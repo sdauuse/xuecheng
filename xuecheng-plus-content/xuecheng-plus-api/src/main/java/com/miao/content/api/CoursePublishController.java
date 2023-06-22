@@ -1,6 +1,7 @@
 package com.miao.content.api;
 
 import com.miao.content.dto.CoursePreviewDto;
+import com.miao.content.model.po.CoursePublish;
 import com.miao.content.service.CoursePublishService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +47,18 @@ public class CoursePublishController {
 
     @ApiOperation("课程发布")
     @ResponseBody
-    @PostMapping ("/coursepublish/{courseId}")
-    public void coursepublish(@PathVariable("courseId") Long courseId){
+    @PostMapping("/coursepublish/{courseId}")
+    public void coursepublish(@PathVariable("courseId") Long courseId) {
         Long companyId = 1232141425L;
-        coursePublishService.publish(companyId,courseId);
+        coursePublishService.publish(companyId, courseId);
     }
 
-
+    @ApiOperation("查询课程发布信息")
+    @ResponseBody
+    @GetMapping("/r/coursepublish/{courseId}")
+    public CoursePublish getCoursepublish(@PathVariable("courseId") Long courseId) {
+        //查询课程发布信息
+        CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
+        return coursePublish;
+    }
 }

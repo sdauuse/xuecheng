@@ -234,16 +234,28 @@ public class CoursePublishServiceImpl implements CoursePublishService {
             //将file转成MultipartFile
             MultipartFile multipartFile = MultipartSupportConfig.getMultipartFile(file);
             //远程调用得到返回值
-            String upload = mediaServiceClient.upload(multipartFile, "course/"+courseId+".html");
-            if(upload==null){
-                log.debug("远程调用走降级逻辑得到上传的结果为null,课程id:{}",courseId);
+            String upload = mediaServiceClient.upload(multipartFile, "course/" + courseId + ".html");
+            if (upload == null) {
+                log.debug("远程调用走降级逻辑得到上传的结果为null,课程id:{}", courseId);
                 XueChengPlusException.cast("上传静态文件过程中存在异常");
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             XueChengPlusException.cast("上传静态文件过程中存在异常");
         }
 
+    }
+
+    /**
+     * 根据课程id查询课程发布信息
+     *
+     * @param courseId
+     * @return
+     */
+    @Override
+    public CoursePublish getCoursePublish(Long courseId) {
+        CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+        return coursePublish;
     }
 
     /**

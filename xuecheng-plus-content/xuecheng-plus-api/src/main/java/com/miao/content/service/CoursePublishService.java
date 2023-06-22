@@ -1,6 +1,7 @@
 package com.miao.content.service;
 
 import com.miao.content.dto.CoursePreviewDto;
+import com.miao.content.model.po.CoursePublish;
 
 import java.io.File;
 
@@ -44,4 +45,6 @@ public interface CoursePublishService {
  File generateCourseHtml(Long courseId);
 
  void uploadCourseHtml(Long courseId, File file);
+
+    CoursePublish getCoursePublish(Long courseId);
 }

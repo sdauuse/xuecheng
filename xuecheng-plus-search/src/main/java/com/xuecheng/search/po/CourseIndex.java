@@ -1,8 +1,6 @@
-package com.miao.content.model.po;
+package com.xuecheng.search.po;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -11,14 +9,13 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 课程发布
+ * 课程索引信息
  * </p>
  *
  * @author itcast
  */
 @Data
-@TableName("course_publish")
-public class CoursePublish implements Serializable {
+public class CourseIndex implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -52,10 +49,6 @@ public class CoursePublish implements Serializable {
      */
     private String tags;
 
-    /**
-     * 创建人
-     */
-    private String username;
 
     /**
      * 大分类
@@ -77,6 +70,7 @@ public class CoursePublish implements Serializable {
      */
     private String stName;
 
+
     /**
      * 课程等级
      */
@@ -86,7 +80,6 @@ public class CoursePublish implements Serializable {
      * 教育模式
      */
     private String teachmode;
-
     /**
      * 课程图片
      */
@@ -97,43 +90,16 @@ public class CoursePublish implements Serializable {
      */
     private String description;
 
-    /**
-     * 课程营销信息，json格式
-     */
-    private String market;
-
-    /**
-     * 所有课程计划，json格式
-     */
-    private String teachplan;
-
-    /**
-     * 教师信息，json格式
-     */
-    private String teachers;
-
 
     /**
      * 发布时间
      */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    @TableField(fill = FieldFill.INSERT)
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
 
     /**
-     * 上架时间
-     */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime onlineDate;
-
-    /**
-     * 下架时间
-     */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime offlineDate;
-
-    /**
-     * 发布状态
+     * 状态
      */
     private String status;
 
@@ -151,7 +117,6 @@ public class CoursePublish implements Serializable {
      * 现价
      */
     private Float price;
-
     /**
      * 原价
      */
